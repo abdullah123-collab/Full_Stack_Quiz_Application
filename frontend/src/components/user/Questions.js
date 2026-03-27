@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 
@@ -15,6 +15,54 @@ const Questions = () => {
     const [tabSwitchCount, setTabSwitchCount] = useState(0);
     const startTime = useRef(Date.now());
     const timerRef = useRef(null);
+
+    const handleSubmit = useCallback(async (autoSubmit = false) => {
+        if (!autoSubmit) {
+            const confirmed = window.confirm('Are you sure you want to submit the quiz? You cannot change your answers after submission.');
+            if (!confirmed) return;
+        }
+
+        setSubmitting(true);
+        const timeTaken = Math.floor((Date.now() - startTime.current) / 1000);
+
+        const formattedAnswers = questions.map(q => ({
+            question_id: q.question_id,
+            selected_option_id: answers[q.question_id] || null
+        }));
+
+        try {
+            const response = await api.post('/quiz/submit', {
+                quiz_id: parseInt(id),
+                answers: formattedAnswers,
+                time_taken: timeTaken
+            });
+
+            if (response.data.success) {
+                navigate(`/result/${response.data.result.result_id}`);
+            }
+        } catch (error) {
+            console.error('Error submitting quiz:', error);
+            alert('Failed to submit quiz. Please try again.');
+            setSubmitting(false);
+        }
+    }, [id, questions, answers, navigate]);
+
+    const fetchQuiz = useCallback(async () => {
+        try {
+            const response = await api.get(`/quizzes/${id}`);
+            if (response.data.success) {
+                setQuiz(response.data.quiz);
+                setQuestions(response.data.questions);
+                setTimeLeft(response.data.quiz.time_limit * 60); // Convert to seconds
+            }
+        } catch (error) {
+            console.error('Error fetching quiz:', error);
+            alert('Failed to load quiz');
+            navigate('/dashboard');
+        } finally {
+            setLoading(false);
+        }
+    }, [id, navigate]);
 
     useEffect(() => {
         fetchQuiz();
@@ -64,7 +112,7 @@ const Questions = () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
             if (timerRef.current) clearInterval(timerRef.current);
         };
-    }, []);
+    }, [fetchQuiz, handleSubmit]);
 
     useEffect(() => {
         if (timeLeft > 0) {
@@ -81,24 +129,7 @@ const Questions = () => {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
         };
-    }, [timeLeft]);
-
-    const fetchQuiz = async () => {
-        try {
-            const response = await api.get(`/quizzes/${id}`);
-            if (response.data.success) {
-                setQuiz(response.data.quiz);
-                setQuestions(response.data.questions);
-                setTimeLeft(response.data.quiz.time_limit * 60); // Convert to seconds
-            }
-        } catch (error) {
-            console.error('Error fetching quiz:', error);
-            alert('Failed to load quiz');
-            navigate('/dashboard');
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [timeLeft, handleSubmit]);
 
     const handleAnswerSelect = (questionId, optionId) => {
         setAnswers({
@@ -116,37 +147,6 @@ const Questions = () => {
     const handlePrevious = () => {
         if (currentQuestion > 0) {
             setCurrentQuestion(currentQuestion - 1);
-        }
-    };
-
-    const handleSubmit = async (autoSubmit = false) => {
-        if (!autoSubmit) {
-            const confirmed = window.confirm('Are you sure you want to submit the quiz? You cannot change your answers after submission.');
-            if (!confirmed) return;
-        }
-
-        setSubmitting(true);
-        const timeTaken = Math.floor((Date.now() - startTime.current) / 1000);
-
-        const formattedAnswers = questions.map(q => ({
-            question_id: q.question_id,
-            selected_option_id: answers[q.question_id] || null
-        }));
-
-        try {
-            const response = await api.post('/quiz/submit', {
-                quiz_id: parseInt(id),
-                answers: formattedAnswers,
-                time_taken: timeTaken
-            });
-
-            if (response.data.success) {
-                navigate(`/result/${response.data.result.result_id}`);
-            }
-        } catch (error) {
-            console.error('Error submitting quiz:', error);
-            alert('Failed to submit quiz. Please try again.');
-            setSubmitting(false);
         }
     };
 

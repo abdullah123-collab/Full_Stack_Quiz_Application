@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 
@@ -10,11 +10,7 @@ const Score = () => {
     const [loading, setLoading] = useState(true);
     const [showConfetti, setShowConfetti] = useState(false);
 
-    useEffect(() => {
-        fetchResult();
-    }, [id]);
-
-    const fetchResult = async () => {
+    const fetchResult = useCallback(async () => {
         try {
             const response = await api.get(`/results/${id}`);
             if (response.data.success) {
@@ -33,7 +29,11 @@ const Score = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, navigate]);
+
+    useEffect(() => {
+        fetchResult();
+    }, [fetchResult]);
 
     const getPerformanceMessage = (percentage) => {
         if (percentage >= 90) return { text: '🎉 Outstanding! You\'re a master!', color: '#4CAF50' };

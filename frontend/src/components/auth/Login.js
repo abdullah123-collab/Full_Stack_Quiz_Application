@@ -309,7 +309,13 @@ const Login = () => {
                             />
                             Remember me
                         </label>
-                        <a href="#" style={styles.forgotLink}>Forgot password?</a>
+                        <button 
+                            type="button"
+                            onClick={() => alert('Password reset feature coming soon!')}
+                            style={styles.forgotLink}
+                        >
+                            Forgot password?
+                        </button>
                     </div>
 
                     {errors.submit && (
