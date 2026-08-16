@@ -1,4 +1,3 @@
-````markdown
 # 🧠 QuizMaster Pro — Full-Stack Quiz Application
 
 > A full-stack quiz platform built with React, Node.js, Express, and MySQL, featuring user authentication, interactive quizzes, performance tracking, leaderboards, and a dedicated admin dashboard.
@@ -569,5 +568,4 @@ See the repository license file for details.
 
 ⭐ **QuizMaster Pro — Full-stack development, authentication, database integration, and interactive quiz management in one application.**
 
-```
-```
+
