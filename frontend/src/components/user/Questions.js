@@ -400,8 +400,11 @@ const Questions = () => {
                         </div>
 
                         <div style={styles.optionsContainer}>
-                            {currentQ?.options.map((option) => {
+                            {currentQ?.options.map((option, index) => {
                                 const isSelected = answers[currentQ.question_id] === option.option_id;
+                                // Automatically assigns A, B, C, D based on current sequence
+                                const dynamicLabel = String.fromCharCode(65 + index);
+
                                 return (
                                     <div
                                         key={option.option_id}
@@ -422,7 +425,7 @@ const Questions = () => {
                                             ...styles.optionLabel,
                                             ...(isSelected && styles.optionLabelSelected)
                                         }}>
-                                            {option.option_label}
+                                            {dynamicLabel}
                                         </div>
                                         <span>{option.option_text}</span>
                                     </div>

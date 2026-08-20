@@ -413,34 +413,35 @@ app.post('/api/quiz/submit', verifyToken, async (req, res) => {
 });
 
 // Get result details
+// Get result details
 app.get('/api/results/:id', verifyToken, async (req, res) => {
     try {
         const resultId = req.params.id;
 
         const [results] = await db.query(`
-      SELECT r.*, q.title as quiz_title, q.category
-      FROM result r
-      JOIN quiz q ON r.quiz_id = q.quiz_id
-      WHERE r.result_id = ? AND r.user_id = ?
-    `, [resultId, req.userId]);
+            SELECT r.*, q.title as quiz_title, q.category
+            FROM result r
+            JOIN quiz q ON r.quiz_id = q.quiz_id
+            WHERE r.result_id = ? AND r.user_id = ?
+        `, [resultId, req.userId]);
 
         if (results.length === 0) {
             return res.status(404).json({ success: false, message: 'Result not found' });
         }
 
         const [answers] = await db.query(`
-      SELECT ua.*, 
-        q.question_text, q.question_type,
-        o.option_text as selected_answer,
-        o.option_label as selected_label,
-        (SELECT option_text FROM options WHERE question_id = q.question_id AND is_correct = TRUE) as correct_answer,
-        (SELECT option_label FROM options WHERE question_id = q.question_id AND is_correct = TRUE) as correct_label
-      FROM user_answers ua
-      JOIN questions q ON ua.question_id = q.question_id
-      LEFT JOIN options o ON ua.selected_option_id = o.option_id
-      WHERE ua.result_id = ?
-    ORDER BY ua.id
-    `, [resultId]);
+            SELECT ua.*, 
+                q.question_text, q.question_type,
+                o.option_text as selected_answer,
+                o.option_label as selected_label,
+                (SELECT option_text FROM options WHERE question_id = q.question_id AND is_correct = TRUE) as correct_answer,
+                (SELECT option_label FROM options WHERE question_id = q.question_id AND is_correct = TRUE) as correct_label
+            FROM user_answers ua
+            JOIN questions q ON ua.question_id = q.question_id
+            LEFT JOIN options o ON ua.selected_option_id = o.option_id
+            WHERE ua.result_id = ?
+            ORDER BY ua.answer_id ASC 
+        `, [resultId]);
 
         res.json({
             success: true,
