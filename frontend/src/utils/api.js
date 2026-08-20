@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-    // Updated fallback to your live Render backend URL
-    baseURL: process.env.REACT_APP_API_URL || 'https://full-stack-quiz-application-vkq1.onrender.com/api',
+    // process.env KO POORA HATA DIA HAI. Sirf direct link bacha hai:
+    baseURL: 'https://full-stack-quiz-application-vkq1.onrender.com/api',
     headers: {
         'Content-Type': 'application/json'
     }
