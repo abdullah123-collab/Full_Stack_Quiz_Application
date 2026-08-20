@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
   origin: [
-    'https://quizmaster-pro.vercel.app',
     'https://quizmasterpro-orpin.vercel.app',
+    'https://quizmaster-admin.vercel.app',
     'http://localhost:3000',
     'http://localhost:3001',
     'http://127.0.0.1:3000',
