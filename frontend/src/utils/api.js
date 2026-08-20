@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
     // process.env KO POORA HATA DIA HAI. Sirf direct link bacha hai:
-    baseURL: 'https://full-stack-quiz-application-vkq1.onrender.com/api',
+    baseURL: 'https://qm-pro-backend-pk.onrender.com/api',
     headers: {
         'Content-Type': 'application/json'
     }
