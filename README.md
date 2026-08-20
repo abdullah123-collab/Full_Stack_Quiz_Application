@@ -35,7 +35,7 @@ QuizMaster Pro is a complete full-stack web application designed to provide an i
 ## 🌐 Live Demo
 
 **QuizMaster Pro:**  
-https://quizmasterpro-nine.vercel.app/
+[https://quizmasterpro-orpin.vercel.app](https://quizmasterpro-orpin.vercel.app)
 
 ---
 
