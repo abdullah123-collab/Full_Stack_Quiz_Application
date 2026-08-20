@@ -2,6 +2,17 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 
+const shuffle = (items) => {
+    const shuffled = [...items];
+
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+    }
+
+    return shuffled;
+};
+
 const Questions = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -52,7 +63,10 @@ const Questions = () => {
             const response = await api.get(`/quizzes/${id}`);
             if (response.data.success) {
                 setQuiz(response.data.quiz);
-                setQuestions(response.data.questions);
+                setQuestions(shuffle(response.data.questions).map(question => ({
+                    ...question,
+                    options: shuffle(question.options || [])
+                })));
                 setTimeLeft(response.data.quiz.time_limit * 60); // Convert to seconds
             }
         } catch (error) {
@@ -66,6 +80,9 @@ const Questions = () => {
 
     useEffect(() => {
         fetchQuiz();
+    }, [fetchQuiz]);
+
+    useEffect(() => {
 
         // Anti-cheat: Prevent right-click
         const handleContextMenu = (e) => e.preventDefault();
@@ -112,7 +129,7 @@ const Questions = () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
             if (timerRef.current) clearInterval(timerRef.current);
         };
-    }, [fetchQuiz, handleSubmit]);
+    }, [handleSubmit]);
 
     useEffect(() => {
         if (timeLeft > 0) {
