@@ -439,7 +439,7 @@ app.get('/api/results/:id', verifyToken, async (req, res) => {
       JOIN questions q ON ua.question_id = q.question_id
       LEFT JOIN options o ON ua.selected_option_id = o.option_id
       WHERE ua.result_id = ?
-      ORDER BY q.order_number
+    ORDER BY ua.id
     `, [resultId]);
 
         res.json({

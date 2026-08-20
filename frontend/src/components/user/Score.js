@@ -366,9 +366,7 @@ const Score = () => {
                                         <span style={styles.answerLabel}>Your Answer:</span>
                                         <span style={styles.answerText}>
                                             {answer.selected_answer ? (
-                                                <>
-                                                    <strong>{answer.selected_label}.</strong> {answer.selected_answer}
-                                                </>
+                                                answer.selected_answer
                                             ) : (
                                                 <em style={{ color: '#999' }}>Not answered</em>
                                             )}
@@ -379,7 +377,7 @@ const Score = () => {
                                         <div style={{ ...styles.answerRow, color: '#4CAF50' }}>
                                             <span style={styles.answerLabel}>Correct Answer:</span>
                                             <span style={styles.answerText}>
-                                                <strong>{answer.correct_label}.</strong> {answer.correct_answer}
+                                                {answer.correct_answer}
                                             </span>
                                         </div>
                                     )}
