@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
     const { user, logout, isAuthenticated } = useAuth();
     const location = useLocation();
 
@@ -196,16 +197,111 @@ const Header = () => {
           from { opacity: 0; transform: scale(0.95); }
           to { opacity: 1; transform: scale(1); }
         }
+
+                .header-container {
+                    position: relative;
+                }
+
+                .mobile-menu-button {
+                    display: none;
+                }
+
+                @media (max-width: 768px) {
+                    .header-container {
+                        height: 64px !important;
+                        padding: 0 16px !important;
+                    }
+
+                    .header-logo {
+                        min-width: 0;
+                        gap: 6px !important;
+                        font-size: 18px !important;
+                        white-space: nowrap;
+                    }
+
+                    .header-logo-icon {
+                        font-size: 26px !important;
+                    }
+
+                    .mobile-menu-button {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex: 0 0 40px;
+                        width: 40px;
+                        height: 40px;
+                        margin-left: auto;
+                        padding: 0;
+                        border: 0;
+                        border-radius: 8px;
+                        background: transparent;
+                        color: #333;
+                        cursor: pointer;
+                        font-size: 26px;
+                        line-height: 1;
+                    }
+
+                    .mobile-menu-button:hover {
+                        background: #f5f7fa;
+                    }
+
+                    .header-nav {
+                        display: none !important;
+                        position: absolute;
+                        top: 64px;
+                        left: 16px;
+                        right: 16px;
+                        flex-direction: column;
+                        align-items: stretch !important;
+                        gap: 0 !important;
+                        padding: 8px;
+                        background: #fff;
+                        border-radius: 0 0 12px 12px;
+                        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+                    }
+
+                    .header-nav.header-nav-open {
+                        display: flex !important;
+                    }
+
+                    .header-nav a {
+                        padding: 12px 16px;
+                        border-radius: 8px;
+                    }
+
+                    .header-account-section {
+                        flex: 0 0 auto;
+                    }
+
+                    .header-account-button {
+                        gap: 0 !important;
+                        padding: 4px !important;
+                    }
+
+                    .header-account-details {
+                        display: none;
+                    }
+                }
       `}</style>
 
             <header style={styles.header}>
-                <div style={styles.container}>
-                    <Link to="/dashboard" style={styles.logo}>
-                        <span style={styles.logoIcon}>🎓</span>
+                                <div className="header-container" style={styles.container}>
+                                        <Link className="header-logo" to="/dashboard" style={styles.logo}>
+                                                <span className="header-logo-icon" style={styles.logoIcon}>🎓</span>
                         <span style={styles.logoText}>QuizMaster Pro</span>
                     </Link>
 
-                    <nav style={styles.nav}>
+                                        <button
+                                                className="mobile-menu-button"
+                                                type="button"
+                                                aria-label={showMobileMenu ? 'Close navigation menu' : 'Open navigation menu'}
+                                                aria-expanded={showMobileMenu}
+                                                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                                        >
+                                                {showMobileMenu ? '✕' : '☰'}
+                                        </button>
+
+                                        <nav className={`header-nav${showMobileMenu ? ' header-nav-open' : ''}`} style={styles.nav}>
                         <Link
                             to="/dashboard"
                             style={{
@@ -214,6 +310,7 @@ const Header = () => {
                             }}
                             onMouseEnter={(e) => e.target.style.color = '#667eea'}
                             onMouseLeave={(e) => location.pathname !== '/dashboard' && (e.target.style.color = '#666')}
+                            onClick={() => setShowMobileMenu(false)}
                         >
                             Home
                         </Link>
@@ -222,6 +319,7 @@ const Header = () => {
                             style={styles.navLink}
                             onMouseEnter={(e) => e.target.style.color = '#667eea'}
                             onMouseLeave={(e) => e.target.style.color = '#666'}
+                            onClick={() => setShowMobileMenu(false)}
                         >
                             About
                         </Link>
@@ -230,18 +328,22 @@ const Header = () => {
                             style={styles.navLink}
                             onMouseEnter={(e) => e.target.style.color = '#667eea'}
                             onMouseLeave={(e) => e.target.style.color = '#666'}
+                            onClick={() => setShowMobileMenu(false)}
                         >
                             Contact Us
                         </Link>
                         <Link 
                             to="/leaderboard" 
-                            style={styles.navLink}>
+                            style={styles.navLink}
+                            onClick={() => setShowMobileMenu(false)}
+                        >
                                 🏆 Leaderboard
                         </Link>
                     </nav>
 
-                    <div style={styles.accountSection}>
+                    <div className="header-account-section" style={styles.accountSection}>
                         <button
+                            className="header-account-button"
                             onClick={() => setShowDropdown(!showDropdown)}
                             style={styles.accountButton}
                             onMouseEnter={(e) => Object.assign(e.currentTarget.style, styles.accountButtonHover)}
@@ -254,7 +356,7 @@ const Header = () => {
                                     getInitials(user?.name || 'User')
                                 )}
                             </div>
-                            <div style={{ textAlign: 'left' }}>
+                            <div className="header-account-details" style={{ textAlign: 'left' }}>
                                 <div style={styles.userName}>{user?.name}</div>
                                 <div style={styles.userLevel}>Level {user?.level || 1}</div>
                             </div>
