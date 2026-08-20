@@ -327,33 +327,38 @@ app.post('/api/quiz/submit', verifyToken, async (req, res) => {
 
         // Get only the questions that were answered with correct answers
         const [questions] = await db.query(`
-      SELECT q.question_id, q.points, o.option_id as correct_option_id
-      FROM questions q
-      JOIN options o ON q.question_id = o.question_id
-      WHERE q.question_id IN (?) AND o.is_correct = TRUE
-    `, [answeredQuestionIds]);
+            SELECT q.question_id, q.points, o.option_id as correct_option_id
+            FROM questions q
+            JOIN options o ON q.question_id = o.question_id
+            WHERE q.question_id IN (?) AND o.is_correct = TRUE
+        `, [answeredQuestionIds]);
 
         let correct_answers = 0;
         let wrong_answers = 0;
         let total_score = 0;
         const userAnswers = [];
 
-        questions.forEach(question => {
-            const userAnswer = answers.find(a => a.question_id === question.question_id);
-            const isCorrect = userAnswer && userAnswer.selected_option_id === question.correct_option_id;
+        // 🚨 FIX YAHAN HAI: Ab hum frontend ki bheji hui 'answers' array (shuffled order) 
+        // par loop chala rahe hain, na ke database ki 'questions' array par.
+        answers.forEach(userAnswer => {
+            const question = questions.find(q => q.question_id === userAnswer.question_id);
+            
+            if (question) {
+                const isCorrect = userAnswer.selected_option_id === question.correct_option_id;
 
-            if (isCorrect) {
-                correct_answers++;
-                total_score += question.points;
-            } else {
-                wrong_answers++;
+                if (isCorrect) {
+                    correct_answers++;
+                    total_score += question.points;
+                } else {
+                    wrong_answers++;
+                }
+
+                userAnswers.push({
+                    question_id: question.question_id,
+                    selected_option_id: userAnswer.selected_option_id || null,
+                    is_correct: isCorrect
+                });
             }
-
-            userAnswers.push({
-                question_id: question.question_id,
-                selected_option_id: userAnswer?.selected_option_id || null,
-                is_correct: isCorrect
-            });
         });
 
         const total_questions = questions.length;
@@ -363,13 +368,13 @@ app.post('/api/quiz/submit', verifyToken, async (req, res) => {
 
         // Insert result
         const [resultInsert] = await db.query(`
-      INSERT INTO result (user_id, quiz_id, score, total_questions, correct_answers, wrong_answers, time_taken, percentage, passed, points_earned)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [req.userId, quiz_id, total_score, total_questions, correct_answers, wrong_answers, time_taken, percentage, passed, points_earned]);
+            INSERT INTO result (user_id, quiz_id, score, total_questions, correct_answers, wrong_answers, time_taken, percentage, passed, points_earned)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [req.userId, quiz_id, total_score, total_questions, correct_answers, wrong_answers, time_taken, percentage, passed, points_earned]);
 
         const result_id = resultInsert.insertId;
 
-        // Insert user answers
+        // Insert user answers (Ab yeh exactly usi order mein save honge jis mein user ne solve kiye)
         if (userAnswers.length > 0) {
             const values = userAnswers.map(a => [result_id, a.question_id, a.selected_option_id, a.is_correct]);
             await db.query(`
@@ -381,13 +386,12 @@ app.post('/api/quiz/submit', verifyToken, async (req, res) => {
         // Update user points and level if passed
         if (passed) {
             await db.query(`
-        UPDATE users 
-        SET total_points = total_points + ?,
-            level = FLOOR((total_points + ?) / 100) + 1
-        WHERE user_id = ?
-      `, [points_earned, points_earned, req.userId]);
+                UPDATE users 
+                SET total_points = total_points + ?,
+                    level = FLOOR((total_points + ?) / 100) + 1
+                WHERE user_id = ?
+            `, [points_earned, points_earned, req.userId]);
 
-            // Fire and forget achievement check (don't await to speed up response)
             checkAchievements(req.userId).catch(err => console.error(err));
         }
 
