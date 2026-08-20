@@ -12,7 +12,8 @@ const Leaderboard = () => {
     const fetchLeaderboard = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/leaderboard', {
+            // Updated to the live Render backend URL
+            const res = await axios.get('https://full-stack-quiz-application-vkq1.onrender.com/api/leaderboard', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.data.success) {

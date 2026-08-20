@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+    // Updated fallback to your live Render backend URL
+    baseURL: process.env.REACT_APP_API_URL || 'https://full-stack-quiz-application-vkq1.onrender.com/api',
     headers: {
         'Content-Type': 'application/json'
     }
@@ -31,9 +32,9 @@ api.interceptors.response.use(
             localStorage.removeItem('user');
             window.location.href = '/login';
         } else if (!error.response) {
-            // Network error - backend not running
-            console.error('Backend connection error. Make sure backend is running on http://localhost:5000');
-            alert('Failed to connect to server. Please ensure the backend is running on port 5000.');
+            // Network error - backend down or CORS issue
+            console.error('Backend connection error. Make sure the backend is live at https://full-stack-quiz-application-vkq1.onrender.com');
+            alert('Failed to connect to the server. Please check your internet connection or try again later.');
         }
         return Promise.reject(error);
     }
